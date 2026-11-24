@@ -1,0 +1,196 @@
+{
+  "entities": {
+    "UserSettings": {
+      "title": "UserSettings",
+      "description": "User learning configuration, daily quota, and current sprint/day progression.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "daily_vocab_quota": {
+          "type": "integer"
+        },
+        "daily_kanji_quota": {
+          "type": "integer"
+        },
+        "daily_review_cap": {
+          "type": "integer"
+        },
+        "always_show_romaji": {
+          "type": "boolean"
+        },
+        "tts_rate": {
+          "type": "number"
+        },
+        "current_sprint": {
+          "type": "integer"
+        },
+        "current_day": {
+          "type": "integer"
+        },
+        "total_repetitions": {
+          "type": "integer"
+        },
+        "streak_days": {
+          "type": "integer"
+        },
+        "haptics_enabled": {
+          "type": "boolean"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "daily_vocab_quota",
+        "daily_kanji_quota",
+        "daily_review_cap",
+        "always_show_romaji",
+        "tts_rate",
+        "current_sprint",
+        "current_day",
+        "total_repetitions",
+        "streak_days",
+        "haptics_enabled",
+        "updatedAt"
+      ]
+    },
+    "SrsItemState": {
+      "title": "SrsItemState",
+      "description": "8-Stage Dynamic SRS memory record for a vocabulary (VXXXX) or kanji (KXXXX) item.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "item_id": {
+          "type": "string",
+          "maxLength": 16,
+          "pattern": "^[VK][0-9]{4}$"
+        },
+        "item_type": {
+          "type": "string",
+          "enum": ["VOCAB", "KANJI"],
+          "maxLength": 10
+        },
+        "sprint": {
+          "type": "integer"
+        },
+        "srs_stage": {
+          "type": "integer"
+        },
+        "next_review_at": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "last_reviewed_at": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "correct_count": {
+          "type": "integer"
+        },
+        "wrong_count": {
+          "type": "integer"
+        },
+        "total_reps": {
+          "type": "integer"
+        },
+        "is_leech": {
+          "type": "boolean"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "item_id",
+        "item_type",
+        "sprint",
+        "srs_stage",
+        "next_review_at",
+        "last_reviewed_at",
+        "correct_count",
+        "wrong_count",
+        "total_reps",
+        "is_leech",
+        "updatedAt"
+      ]
+    },
+    "SessionLog": {
+      "title": "SessionLog",
+      "description": "Completed assessment or SRS session record for competency tracking.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "session_id": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "session_type": {
+          "type": "string",
+          "enum": ["DAILY_SRS", "BATCH_LEARN", "SPEAKING_DRILL", "JLPT_ASSESSMENT", "KANA_DRILL"],
+          "maxLength": 32
+        },
+        "sprint": {
+          "type": "integer"
+        },
+        "day": {
+          "type": "integer"
+        },
+        "total_questions": {
+          "type": "integer"
+        },
+        "correct_answers": {
+          "type": "integer"
+        },
+        "accuracy_pct": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "session_id",
+        "session_type",
+        "sprint",
+        "day",
+        "total_questions",
+        "correct_answers",
+        "accuracy_pct",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserSettings" },
+      "description": "Root user settings and current Sprint/Day progress."
+    },
+    "/users/{userId}/srs_items/{itemId}": {
+      "schema": { "$ref": "#/entities/SrsItemState" },
+      "description": "Per-item 8-Stage SRS state and 612-repetition counter."
+    },
+    "/users/{userId}/sessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/SessionLog" },
+      "description": "Assessment and daily review session logs."
+    }
+  }
+}

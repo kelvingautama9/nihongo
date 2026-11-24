@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-jp: 'Noto Sans JP', 'Plus Jakarta Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #0a0a0a;
+    overflow-x: hidden;
+  }
+}
+
+.font-jp {
+  font-family: var(--font-jp);
+}
+
+.font-mono-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 144Hz High-Refresh Compositor-Friendly Scroll & GPU Acceleration */
+.gpu-scroll {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  overscroll-behavior-y: contain;
+}

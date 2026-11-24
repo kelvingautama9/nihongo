@@ -1,0 +1,9 @@
+{
+  "daily_vocab_quota": 8,
+  "daily_kanji_quota": 2,
+  "daily_review_cap": 150,
+  "always_show_romaji": false,
+  "tts_rate": 0.9,
+  "current_sprint": 1,
+  "current_day": 1
+}

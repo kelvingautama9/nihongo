@@ -1,0 +1,216 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isVerified() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUserSettings(data) {
+      return data.keys().hasAll([
+        'userId',
+        'daily_vocab_quota',
+        'daily_kanji_quota',
+        'daily_review_cap',
+        'always_show_romaji',
+        'tts_rate',
+        'current_sprint',
+        'current_day',
+        'total_repetitions',
+        'streak_days',
+        'haptics_enabled',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId',
+        'daily_vocab_quota',
+        'daily_kanji_quota',
+        'daily_review_cap',
+        'always_show_romaji',
+        'tts_rate',
+        'current_sprint',
+        'current_day',
+        'total_repetitions',
+        'streak_days',
+        'haptics_enabled',
+        'updatedAt'
+      ]) &&
+      data.userId is string && data.userId.size() <= 128 && data.userId.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.userId == request.auth.uid &&
+      data.daily_vocab_quota is int && data.daily_vocab_quota >= 1 && data.daily_vocab_quota <= 50 &&
+      data.daily_kanji_quota is int && data.daily_kanji_quota >= 1 && data.daily_kanji_quota <= 20 &&
+      data.daily_review_cap is int && data.daily_review_cap >= 10 && data.daily_review_cap <= 500 &&
+      data.always_show_romaji is bool &&
+      (data.tts_rate is int || data.tts_rate is float) && data.tts_rate >= 0.5 && data.tts_rate <= 2.0 &&
+      data.current_sprint is int && data.current_sprint >= 1 && data.current_sprint <= 26 &&
+      data.current_day is int && data.current_day >= 1 && data.current_day <= 14 &&
+      data.total_repetitions is int && data.total_repetitions >= 0 && data.total_repetitions <= 10000000 &&
+      data.streak_days is int && data.streak_days >= 0 && data.streak_days <= 3650 &&
+      data.haptics_enabled is bool &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidSrsItemState(data) {
+      return data.keys().hasAll([
+        'userId',
+        'item_id',
+        'item_type',
+        'sprint',
+        'srs_stage',
+        'next_review_at',
+        'last_reviewed_at',
+        'correct_count',
+        'wrong_count',
+        'total_reps',
+        'is_leech',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId',
+        'item_id',
+        'item_type',
+        'sprint',
+        'srs_stage',
+        'next_review_at',
+        'last_reviewed_at',
+        'correct_count',
+        'wrong_count',
+        'total_reps',
+        'is_leech',
+        'updatedAt'
+      ]) &&
+      data.userId is string && data.userId.size() <= 128 && data.userId.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.userId == request.auth.uid &&
+      data.item_id is string && data.item_id.size() == 5 && data.item_id.matches('^[VK][0-9]{4}$') &&
+      data.item_type is string && data.item_type.size() <= 10 && (data.item_type == 'VOCAB' || data.item_type == 'KANJI') &&
+      data.sprint is int && data.sprint >= 1 && data.sprint <= 26 &&
+      data.srs_stage is int && data.srs_stage >= 0 && data.srs_stage <= 8 &&
+      data.next_review_at is string && data.next_review_at.size() >= 10 && data.next_review_at.size() <= 40 &&
+      data.last_reviewed_at is string && data.last_reviewed_at.size() >= 10 && data.last_reviewed_at.size() <= 40 &&
+      data.correct_count is int && data.correct_count >= 0 && data.correct_count <= 100000 &&
+      data.wrong_count is int && data.wrong_count >= 0 && data.wrong_count <= 100000 &&
+      data.total_reps is int && data.total_reps >= 0 && data.total_reps <= 100000 &&
+      data.is_leech is bool &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidSessionLog(data) {
+      return data.keys().hasAll([
+        'userId',
+        'session_id',
+        'session_type',
+        'sprint',
+        'day',
+        'total_questions',
+        'correct_answers',
+        'accuracy_pct',
+        'createdAt'
+      ]) &&
+      data.keys().hasOnly([
+        'userId',
+        'session_id',
+        'session_type',
+        'sprint',
+        'day',
+        'total_questions',
+        'correct_answers',
+        'accuracy_pct',
+        'createdAt'
+      ]) &&
+      data.userId is string && data.userId.size() <= 128 && data.userId.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.userId == request.auth.uid &&
+      data.session_id is string && data.session_id.size() >= 1 && data.session_id.size() <= 64 && data.session_id.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.session_type is string && data.session_type.size() <= 32 &&
+      (data.session_type == 'DAILY_SRS' || data.session_type == 'BATCH_LEARN' || data.session_type == 'SPEAKING_DRILL' || data.session_type == 'JLPT_ASSESSMENT' || data.session_type == 'KANA_DRILL') &&
+      data.sprint is int && data.sprint >= 1 && data.sprint <= 26 &&
+      data.day is int && data.day >= 1 && data.day <= 14 &&
+      data.total_questions is int && data.total_questions >= 1 && data.total_questions <= 500 &&
+      data.correct_answers is int && data.correct_answers >= 0 && data.correct_answers <= data.total_questions &&
+      data.accuracy_pct is int && data.accuracy_pct >= 0 && data.accuracy_pct <= 100 &&
+      data.createdAt is timestamp;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUserSettings(incoming()) && incoming().updatedAt == request.time;
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUserSettings(incoming()) &&
+        incoming().userId == existing().userId &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'daily_vocab_quota',
+          'daily_kanji_quota',
+          'daily_review_cap',
+          'always_show_romaji',
+          'tts_rate',
+          'current_sprint',
+          'current_day',
+          'total_repetitions',
+          'streak_days',
+          'haptics_enabled',
+          'updatedAt'
+        ]);
+
+      match /srs_items/{itemId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(itemId) &&
+          exists(/databases/$(database)/documents/users/$(userId));
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(itemId) &&
+          isValidSrsItemState(incoming()) &&
+          incoming().item_id == itemId &&
+          incoming().updatedAt == request.time &&
+          exists(/databases/$(database)/documents/users/$(userId));
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(itemId) &&
+          isValidSrsItemState(incoming()) &&
+          incoming().userId == existing().userId &&
+          incoming().item_id == existing().item_id &&
+          incoming().item_type == existing().item_type &&
+          incoming().updatedAt == request.time &&
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'srs_stage',
+            'next_review_at',
+            'last_reviewed_at',
+            'correct_count',
+            'wrong_count',
+            'total_reps',
+            'is_leech',
+            'updatedAt'
+          ]) &&
+          exists(/databases/$(database)/documents/users/$(userId));
+      }
+
+      match /sessions/{sessionId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(sessionId) &&
+          exists(/databases/$(database)/documents/users/$(userId));
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(sessionId) &&
+          isValidSessionLog(incoming()) &&
+          incoming().session_id == sessionId &&
+          incoming().createdAt == request.time &&
+          exists(/databases/$(database)/documents/users/$(userId));
+      }
+    }
+  }
+}

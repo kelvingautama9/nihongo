@@ -1,0 +1,6 @@
+{
+  "name": "Nihongo Assessment & SRS Engine",
+  "description": "Platform evaluasi kompetensi JLPT/JFT dan pelatihan Bahasa Jepang berbasis 8-Stage Dynamic SRS, Active Recall, serta jembatan percakapan Minna no Nihongo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
